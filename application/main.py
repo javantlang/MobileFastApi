@@ -1,5 +1,6 @@
 import zipfile
 import io
+import json
 from utils.recognition import Recognition
 from fastapi import FastAPI, Request
 
@@ -17,5 +18,7 @@ async def root(request: Request):
     files: bytes = await request.body()
     unzip(files)
     df = Recognition.recognize(unzip_folder)
-    response = df.reset_index().to_json(orient='records')[1:-1].replace('},{', '} {')
-    return {response}
+    df = df.reset_index(drop=True)
+    df_json = df.to_json(orient='columns')
+    response = json.loads(df_json)
+    return response
